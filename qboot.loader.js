@@ -1,14 +1,15 @@
 /**
- * Qboot.load v0.6
+ * Qboot.load v0.6 lite
+ * lite版 去除引入核心文件自动加载机制
  * Date:2012.8.25+
  * Copyright 2012, irideas & 月影
  *
  * CHANGE LOG:
- * 06/11 2012 document.getElementsByTagName('script')[0].hasOwnProperty("parentNode"); Chrome18返回TRUE,坑爹啊
- * 12/09 2011 加入done方法 外部可设置该模块状态为完成
- * 11/16 2011 qboot.add 配置中加入force属性 强行拉取
- * 05/09 2011 qboot.load.css 支持传入第二个可选参数 默认为:inline-css-id
- 
+ * 03.19 2013 第一个参数是方法失败的情况
+ * 06.11 2012 document.getElementsByTagName('script')[0].hasOwnProperty("parentNode"); Chrome18返回TRUE,坑爹啊
+ * 12.09 2011 加入done方法 外部可设置该模块状态为完成
+ * 11.16 2011 qboot.add 配置中加入force属性 强行拉取
+ * 05.09 2011 qboot.load.css 支持传入第二个可选参数 默认为:inline-css-id
  *
  * BUG :
  * load.css 在HEAD中使用 IE6会中止加载 某些特殊条件下...(都遗忘了)
@@ -18,7 +19,6 @@
  * 场景load(url) 需要用一个通用配置 如charset等
  * load.css(string,id) 对同一ID的使用有时不需要追加 而是剔除
  
- *
  * USAGE:
  * var qload = qboot.load;
 
@@ -48,8 +48,10 @@
  
  * [9] qload({name: 'jQuery1.4.4', path:"http://tuan.360.cn/scripts/jquery-1.4.4.min.js",type:"js"}, callback);
  * //直接用配置的方式加载js
+ *
+ * [10] qload(function(){});
+ * //塞入方法
 **/
-
 qboot.load = qboot.load||{};
 qboot.load = (function() {
 var _doc = document,
@@ -62,13 +64,12 @@ _isArray = function(e) { return e.constructor === Array; },
 // 内部配置文件
 _config = {
     //模块依赖
-    //mods: {
+    //{
     // moduleName: {
     //     path: 'URL',
     //     type:'js|css',
     //     requires:['moduleName1', 'fileURL']
     //   }
-    // ...
     //}
     mods: {}
 },
@@ -92,18 +93,18 @@ _removeScriptTag = function(node){
     node = null;
 },
 _addScriptOnload = _doc.createElement('script').readyState ?
-	function(node, callback) {
-		node.onreadystatechange = function() {
-			var rs = node.readyState;
-			if (rs === 'loaded' || rs === 'complete') {
-				node.onreadystatechange = null;
-				callback.apply(this);
-			}
-		};
-	} :
-	function(node, callback) {
-		node.addEventListener('load', callback, false);
-	},
+    function(node, callback) {
+        node.onreadystatechange = function() {
+            var rs = node.readyState;
+            if (rs === 'loaded' || rs === 'complete') {
+                node.onreadystatechange = null;
+                callback.apply(this);
+            }
+        };
+    } :
+    function(node, callback) {
+        node.addEventListener('load', callback, false);
+    },
 // 加载js/css文件
 _load = function(url, type, charset, force, cb, context) {
     var refFile = _jsSelf;
@@ -113,10 +114,10 @@ _load = function(url, type, charset, force, cb, context) {
     if (_loaded[url]) {
         _loadingQueue[url] = false;
         if(!force)
-		{
-			cb&&cb(url, context);
-			return;
-		}
+        {
+            cb&&cb(url, context);
+            return;
+        }
     }
     // 加载中的文件有可能是太大，有可能是404
     // 当加载队列中再次出现此模块会再次加载，理论上会出现重复加载
@@ -131,7 +132,7 @@ _load = function(url, type, charset, force, cb, context) {
     if (type === 'js' || url.indexOf('.js') >= 0) {
         n = _doc.createElement('script');
         n.setAttribute('type', 'text/javascript');
-		charset&&(n.charset = charset);
+        charset&&(n.charset = charset);
         n.setAttribute('src', url);
         n.setAttribute('async', true);
 
@@ -144,7 +145,7 @@ _load = function(url, type, charset, force, cb, context) {
     } else if (type === 'css' || url.indexOf('.css') >= 0) {
         n = _doc.createElement('link');
         n.setAttribute('type', 'text/css');
-		charset&&(n.charset = charset);
+        charset&&(n.charset = charset);
         n.setAttribute('rel', 'stylesheet');
         n.setAttribute('href', url);
         _loaded[url] = true;
@@ -251,7 +252,7 @@ _do = function() {
     var args = [].slice.call(arguments), thread;
     var target = args[0];
     //处理第一个参数是JSON的情况
-    if(typeof target !== 'string'){
+    if(typeof target !== 'string'&&typeof target !== 'function'){
         var sName = target.name || target.path, 
             cb = target.callback || args[1];
 
@@ -276,17 +277,17 @@ _do.delay = function() {
 };
 _do.done = function() {
     var args = [].slice.call(arguments),i=0,currentMod;
-	for(;currentMod=args[i++];)
-	{
-		if (typeof currentMod === 'string') {
-			if (_config.mods[currentMod]) {
-			  mod = _config.mods[currentMod];
-			  _loaded[mod.path] = true;
+    for(;currentMod=args[i++];)
+    {
+        if (typeof currentMod === 'string') {
+            if (_config.mods[currentMod]) {
+              mod = _config.mods[currentMod];
+              _loaded[mod.path] = true;
             } else if (/\.js|\.css/i.test(currentMod)) {
               _loaded[currentMod] = true;
             }
        }
-	}
+    }
 };
 _do.css = function(str,id) {
  id = id || "qboot-inline-css";
