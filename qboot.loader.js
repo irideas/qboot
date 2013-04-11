@@ -1,7 +1,7 @@
 /**
- * Qboot.load v0.6 lite
+ * Qboot.load v0.7
  * lite版 去除引入核心文件自动加载机制
- * Date:2012.8.25+
+ * Date:2013.3.19
  * Copyright 2012, irideas & 月影
  *
  * CHANGE LOG:
@@ -93,18 +93,18 @@ _removeScriptTag = function(node){
     node = null;
 },
 _addScriptOnload = _doc.createElement('script').readyState ?
-    function(node, callback) {
-        node.onreadystatechange = function() {
-            var rs = node.readyState;
-            if (rs === 'loaded' || rs === 'complete') {
-                node.onreadystatechange = null;
-                callback.apply(this);
-            }
-        };
-    } :
-    function(node, callback) {
-        node.addEventListener('load', callback, false);
-    },
+	function(node, callback) {
+		node.onreadystatechange = function() {
+			var rs = node.readyState;
+			if (rs === 'loaded' || rs === 'complete') {
+				node.onreadystatechange = null;
+				callback.apply(this);
+			}
+		};
+	} :
+	function(node, callback) {
+		node.addEventListener('load', callback, false);
+	},
 // 加载js/css文件
 _load = function(url, type, charset, force, cb, context) {
     var refFile = _jsSelf;
@@ -114,10 +114,10 @@ _load = function(url, type, charset, force, cb, context) {
     if (_loaded[url]) {
         _loadingQueue[url] = false;
         if(!force)
-        {
-            cb&&cb(url, context);
-            return;
-        }
+		{
+			cb&&cb(url, context);
+			return;
+		}
     }
     // 加载中的文件有可能是太大，有可能是404
     // 当加载队列中再次出现此模块会再次加载，理论上会出现重复加载
@@ -132,7 +132,7 @@ _load = function(url, type, charset, force, cb, context) {
     if (type === 'js' || url.indexOf('.js') >= 0) {
         n = _doc.createElement('script');
         n.setAttribute('type', 'text/javascript');
-        charset&&(n.charset = charset);
+		charset&&(n.charset = charset);
         n.setAttribute('src', url);
         n.setAttribute('async', true);
 
@@ -145,7 +145,7 @@ _load = function(url, type, charset, force, cb, context) {
     } else if (type === 'css' || url.indexOf('.css') >= 0) {
         n = _doc.createElement('link');
         n.setAttribute('type', 'text/css');
-        charset&&(n.charset = charset);
+		charset&&(n.charset = charset);
         n.setAttribute('rel', 'stylesheet');
         n.setAttribute('href', url);
         _loaded[url] = true;
@@ -277,32 +277,32 @@ _do.delay = function() {
 };
 _do.done = function() {
     var args = [].slice.call(arguments),i=0,currentMod;
-    for(;currentMod=args[i++];)
-    {
-        if (typeof currentMod === 'string') {
-            if (_config.mods[currentMod]) {
-              mod = _config.mods[currentMod];
-              _loaded[mod.path] = true;
+	for(;currentMod=args[i++];)
+	{
+		if (typeof currentMod === 'string') {
+			if (_config.mods[currentMod]) {
+			  mod = _config.mods[currentMod];
+			  _loaded[mod.path] = true;
             } else if (/\.js|\.css/i.test(currentMod)) {
               _loaded[currentMod] = true;
             }
        }
-    }
+	}
 };
 _do.css = function(str,id) {
- id = id || "qboot-inline-css";
- var css = _doc.getElementById(id);
- if (!css) {
-   css = _doc.createElement('style');
-   css.type = 'text/css';
-   css.id = id;
-   _doc.getElementsByTagName('head')[0].appendChild(css);
- }
- if (css.styleSheet) {
-   css.styleSheet.cssText = css.styleSheet.cssText + str;
- } else {
-   css.appendChild(_doc.createTextNode(str));
- }
+    id = id || "qboot-inline-css";
+    var css = _doc.getElementById(id);
+    if (!css) {
+    css = _doc.createElement('style');
+    css.type = 'text/css';
+    css.id = id;
+    _doc.getElementsByTagName('head')[0].appendChild(css);
+    }
+    if (css.styleSheet) {
+    css.styleSheet.cssText = css.styleSheet.cssText + str;
+    } else {
+    css.appendChild(_doc.createTextNode(str));
+    }
 };
 return _do;
 })();
