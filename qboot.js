@@ -97,7 +97,8 @@ qboot = {
 
 			window[jsonp].add(function(data, err){
 				clearTimeout(t);				
-				if(callback){									
+				if(callback){
+					err = err || {status:'ok'};									
 					callback(data, {status:'ok'});					
 				}
 			});
