@@ -140,7 +140,7 @@ qboot = {
 			}
 		}
 
-		for (i in src) {
+		for (var i in src) {
 			des[i] = map(des[i], src[i], i, des, src);
 			if(des[i] === undefined) delete des[i];	//如果返回undefined，尝试删掉这个属性
 		}
